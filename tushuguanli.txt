@@ -1,0 +1,914 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<conio.h>
+
+void outreader(struct Student* head);                  //输出读者信息                           
+void outbok(struct Book * head);                        //输出书籍信息
+void ret_bok(struct Student*head1,struct Book*head2);     //还书系统
+void bor_bok(struct Student*head1,struct Book*head);      //借书系统
+void changebok(struct Book*head);                         //修改图书信息
+struct Student*deletereader(struct Student*head);         //删除读者信息
+struct Book*deletebok(struct Book*head);                 //删除书籍信息
+struct Student*searchreader(struct Student*head);         //查询读者信息
+struct Book*searchbok(struct Book*head);                  //查询书籍新信息
+struct Student* readreader();                          //加载学生信息
+struct Book* readbok();                              // 加载书籍信息
+void savereader(struct Student*head);                 // 保存读者信息
+void savebok(struct Book*head);                      //保存书籍信息
+void inputreader ();                             // 录入或添加学生信息
+void inputbok ();                              //录入或添加书籍信息
+
+
+typedef struct Book         //图书信息
+{
+	int num1;       //书籍编号
+	char bok_name[20];       //书名
+	char wrt_name[20];       //作者名
+	char num2[20];       //分类号
+	char off_name[20];   //出版单位
+	char time[20];       //出版时间
+	int  count;           //库存数量
+	float price;         //价格
+    struct Book*next;
+}BOK;
+
+typedef struct Student     //读者信息
+{
+	int stunum;       //学生编号
+	int lendnum;       //借阅号
+	char name[20];      //学生姓名
+	int max_bor;         //最大借阅额度
+	int hav_bou;         //已借阅数量
+	BOK lend[4];         //已借图书信息
+	struct Student*next;
+}STU;
+
+int saveflag=0;           // 作为文件是否修改的标记，若修改提示保存
+
+int main()
+{
+	BOK *head1=NULL;
+	STU*head2=NULL;
+	int a,b,z;
+	char ch;   //接收 'y'或'n' ，作出判断
+    char key3[20];    //  输入的密码
+	char key1[20]={"12345"};    //书籍管理系统的密码
+	char key2[20]={"23456"};     //读者管理系统的密码
+	
+	printf("☆☆☆☆☆☆☆☆☆☆☆☆☆☆欢迎进入图书馆管理系统☆☆☆☆☆☆☆☆☆☆☆☆☆☆\n\n\n");
+   
+	do{  z=1;      //当z=0时，跳出当前系统
+		printf("*******************************************************************\n\n  1-书籍管理系统    2-读者管理系统     3-借还书系统    4-退出系统\n*******************************************************************");
+     printf("\n\n请输入要进入的系统的编号：");
+	     scanf("%d",&b);
+
+		 if(b==1)   //进入书籍管理系统
+		 {  printf("\n请输入书籍管理系统密码：");
+ 	         scanf("%s",key3);
+			 if(strcmp(key1,key3)==0)
+
+			do{
+	              printf("\n**********************************\n");
+	              printf("1-录入或添加图书信息\n2-加载图书信息\n3-保存图书信息\n4-查询图书信息\n5-删除图书信息\n6-修改图书信息\n7-浏览图书信息\n8-退出\n");
+	              printf("**********************************\n");
+	              printf("请按键选择：");
+	              scanf("%d",&a);
+				  if(a==8)        //退出时提示是否需要对修改进行保存
+				  {
+					  if(saveflag==1)
+					  {
+						  printf("\n是否要保存书籍信息？按Y保存，按N不保存\n");
+						  getchar();
+						  scanf("%c",&ch);
+						  if(ch=='y'||ch=='Y')
+							  savebok(head1);
+						  
+					  }
+				       printf("\n保存完毕！退出书籍管理系统。\n\n");
+						  break;
+				  }
+	          switch(a)
+			  {
+	                  case 1:inputbok();break;       //录入或添加图书信息
+					  case 2:head1=readbok();break;     //加载图书信息
+		              case 3:savebok(head1);break;          //保存图书信息
+		              case 4:searchbok(head1);break;        //查询图书信息
+		              case 5:deletebok(head1);break;        //删除图书信息
+	                  case 6:changebok(head1);break;        //修改图书信息
+		              case 7:outbok(head1);break;           //浏览图书信息
+                     
+	                 default:printf("输入错误，请重新输入！\n");break;
+			  }
+			}while(z);
+			else printf("密码输入错误！！\n");
+		 }
+
+
+
+
+		else if(b==2)       //进入读者管理系统
+		{
+	       printf("请输入读者管理系统密码：");
+ 	         scanf("%s",key3);
+			 if(strcmp(key2,key3)==0)
+			do{
+	              printf("\n**********************************\n");
+	              printf("1-录入或添加读者信息\n2-加载读者信息\n3-保存读者信息\n4-查询读者信息\n5-删除读者信息\n6-浏览读者信息\n7-退出\n");
+	              printf("**********************************\n");
+	              printf("请按键选择：");
+	              scanf("%d",&a);
+				  if(a==7)
+				  {
+					  if(saveflag==1)
+					  {
+						  printf("是否要保存读者信息？按Y保存，按N不保存\n");
+						
+						  scanf("%c",&ch);
+                          getchar();
+						  if(ch=='y'||ch=='Y')
+							  savereader(head2);
+						  
+					  }
+				       printf("保存完毕！退出读者管理系统。\n\n");      
+						  break;
+				  }
+	         switch(a)
+			 {
+	              case 1:inputreader();break;          //录入或添加读者信息
+		          case 2:head2=readreader();break;       //加载读者信息
+				  case 3:savereader(head2);break;        //保存读者信息
+				  case 4:searchreader(head2);break;      //查询读者信息
+	              case 5:deletereader(head2);break;      //删除读者信息
+	              case 6:outreader(head2);break;          //浏览读者信息
+		          default:printf("输入错误，请重新输入！\n");break;
+			 }
+			}while(z);
+				else printf("密码输入错误！！\n");
+		}
+       else if(b==3)      //进入借还书系统
+	   {
+	       
+		   head1=readbok();
+		   head2=readreader();
+
+			do{
+	              printf("\n**********************************\n");
+	              printf("1-浏览图书信息\n2-查询图书信息\n3-借阅图书\n4-还书\n5-借阅信息查询\n6-退出\n");
+	              printf("**********************************\n");
+	              printf("请按键选择：");
+	              scanf("%d",&a);
+			if(a==6)
+			{
+                   savereader(head2);   //退出系统前将借阅信息保存
+				 printf("保存完毕！退出书籍管理系统。\n");
+				 break;
+			}
+	         switch(a)
+			 {
+			      case 1:outbok(head1);break;         //浏览图书信息
+		          case 2:searchbok(head1);break;       //查询图书信息
+	              case 3:bor_bok(head2,head1);break;    //借阅图书
+	              case 4:ret_bok(head2,head1);break;    //还书
+				  case 5:outreader(head2);break;        //借阅信息查询
+				  
+	              default:printf("输入错误，请重新输入！\n");break;
+			 }
+			}while(z);
+		}
+	   else if(b==4)
+        exit(0);
+	}while(1);
+	    
+}
+
+
+
+void inputbok ()     
+{FILE*fp;
+BOK s;
+char filename[20];
+printf("请输入书籍信息的文件名: ");
+	scanf("%s",filename);
+    if(strchr(filename,'.')==NULL)
+		strcat(filename,".dat");
+	if((fp=fopen(filename,"ab+"))==NULL)
+	{
+		printf("文件打开错误！\n");
+	
+		return ;
+	}
+
+	do{
+		printf("请输入书籍编号,当输入0时停止输入\n");
+			scanf("%d",&s.num1);
+			if(s.num1!=0)
+			{printf("请输入该书的书名：\n");
+	           scanf("%s",s.bok_name);
+	         printf("请输入该书的作者名：\n");
+	           scanf("%s",s.wrt_name);
+	         printf("请输入该书的书籍分类号：\n");
+	           scanf("%s",s.num2);
+	         printf("请输入该书的出版单位：\n");
+	           scanf("%s",s.off_name);
+	         printf("请输入该书的出版时间：\n");
+	           scanf("%s",s.time);
+	         printf("请输入该书的库存数量：\n");
+	           scanf("%d",&s.count);
+	        printf("请输入该书的书籍价格：\n");
+	           scanf("%f",&s.price);
+			   s.next=NULL;
+			fwrite(&s,sizeof(BOK),1,fp);     //将书籍信息一组一组地写入文件当中
+			}
+			else
+			{	printf("输入结束！\n");
+			         break;}
+	}while(1);
+	saveflag=1;
+	fclose(fp);
+
+}
+
+
+void inputreader ()
+{FILE*fp;
+STU r;
+char filename[20];
+printf("请输入学生信息的文件名: ");
+	scanf("%s",filename);
+    if(strchr(filename,'.')==NULL)
+		strcat(filename,".dat");
+	if((fp=fopen(filename,"ab+"))==NULL)
+	{
+		printf("文件打开错误！\n");
+		
+		return ;
+	}
+
+	do{
+		printf("请输入该学生的编号,当输入0时停止输入\n");                   
+			scanf("%d",&r.stunum);
+			if(r.stunum!=0)
+			{	
+		printf("请输入该学生的借阅号：\n");
+	        scanf("%d",&r.lendnum);
+	    printf("请输入该学生的姓名：\n");
+	        scanf("%s",r.name);
+	       r.max_bor=4;
+	       r.hav_bou=0;
+			   r.next=NULL;
+			fwrite(&r,sizeof(STU),1,fp);
+			}
+			else
+			{	printf("输入结束！\n");
+			break;}
+	}while(1);
+	fclose(fp);
+
+}
+
+
+void savebok(struct Book*head)
+{FILE*fp;
+BOK*p;
+char filename[20];
+printf("请输入要保存的书籍信息的文件名: \n");
+	scanf("%s",filename);
+	if(strchr(filename,'.')==NULL)
+		strcat(filename,".dat");
+	if((fp=fopen(filename,"wb"))==NULL)
+	{printf("打开文件失败！\n");
+	return;
+	}
+	p=head->next;        //当前列表中所有数据写入内存
+	while(p)
+	{fwrite(p,sizeof(BOK),1,fp);      //每次写一个节点的信息至文件
+	p=p->next;
+	}
+	printf("文件保存成功！\n");
+	fclose(fp);
+}
+
+
+void savereader(struct Student*head)
+{FILE*fp;
+STU*p;
+char filename[20];
+printf("请输入要保存的学生信息的文件名: \n");
+	scanf("%s",filename);
+	if(strchr(filename,'.')==NULL)
+		strcat(filename,".dat");
+	if((fp=fopen(filename,"wb"))==NULL)
+	{printf("打开文件失败！\n");
+	return;
+	}
+	p=head->next;                 //当前列表中所有数据写入内存
+	while(p)
+	{fwrite(p,sizeof(STU),1,fp);        //每次写一个节点的信息至文件
+	p=p->next;
+	}
+	printf("文件保存成功！\n");
+	fclose(fp);
+}
+
+
+
+struct Book* readbok()
+{
+	FILE*fp;
+    BOK*bh;   //指向表中第一项的指针
+    BOK*bl;    // 指向最后一个的指针
+    BOK*p;     //工作指针
+    char filename[20];
+	bh=(BOK*)malloc(sizeof(BOK));
+	bh->next=NULL;
+	bl=bh;
+	printf("请输入要加载的书籍信息的文件名：\n");
+	scanf("%s",filename);
+	if(strchr(filename,'.')==NULL)
+		strcat(filename,".dat");
+	if((fp=fopen(filename,"rb"))==NULL)     //以读的方式打开文件
+	{
+		printf("文件打开错误！\n");
+		
+		return NULL;
+	}
+	while(!feof(fp))           //从文件中读取书籍信息，放到链表中存放
+	{
+		p=(BOK*)malloc(sizeof(BOK));
+		if(fread(p,sizeof(BOK),1,fp)==1)
+		{
+			p->next=NULL;
+			bl->next=p;
+			bl=p;
+		}
+	
+	}
+	printf("文件加载成功！\n");
+	fclose(fp);
+	return bh;       //返回读出的数据库文件的指针
+}
+
+
+struct Student* readreader()
+{
+	FILE*fp;
+    STU*sh;   //指向表中第一项的指针
+    STU*sl;    // 指向最后一个的指针
+    STU*p;        //工作指针
+    char filename[20];
+	sh=(STU*)malloc(sizeof(STU));
+	sh->next=NULL;
+	sl=sh;
+	printf("请输入要加载的读者信息的文件名：\n");
+	scanf("%s",filename);
+	if(strchr(filename,'.')==NULL)       //以读的方式打开文件
+		strcat(filename,".dat");
+	if((fp=fopen(filename,"rb"))==NULL)
+	{
+		printf("文件打开错误！\n");
+		return NULL;
+	}
+	while(!feof(fp))              //从文件中读取读者信息，放到链表中存放
+	{
+		p=(STU*)malloc(sizeof(STU));
+		if(fread(p,sizeof(STU),1,fp)==1)
+		{
+			p->next=NULL;
+			sl->next=p;
+			sl=p;
+		}
+	
+	}
+	printf("文件加载成功！\n");
+	fclose(fp);
+	return sh;           //返回读出的数据库文件的指针
+}
+
+
+struct Book*searchbok(struct Book*head)
+{
+	int a;
+	BOK*p,*r=NULL;
+	char str[20];
+	if(!head->next)
+	{
+		printf("没有书籍信息！\n");
+        getchar();
+		return NULL;
+	}
+
+	printf("请选择查询方式：1-按书名    2-按作者   3-按出版单位    4-按出版时间\n");
+	scanf("%d",&a);
+	if(a==1)
+	{
+		printf("请输入书名：\n");
+		scanf("%s",str);
+		p=head->next;
+		while(p)
+		{
+			if(strcmp(p->bok_name,str)==0)
+			{
+				if(r==NULL)
+					r=p;
+					printf("%-10d%-14s%-10s%-6s%-14s%-10s%-8d%-5.2f\n",
+					p->num1,p->bok_name,p->wrt_name,p->num2,p->off_name,p->time,p->count,p->price);
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+
+	else if(a==2)
+	{
+		printf("请输入作者：\n");
+		scanf("%s",str);
+		p=head->next;
+		while(p)
+		{
+			if(strcmp(p->wrt_name,str)==0)
+			{
+				if(r==NULL)
+					r=p;
+					printf("%-10d%-14s%-10s%-6s%-14s%-10s%-8d%-5.2f\n",
+					p->num1,p->bok_name,p->wrt_name,p->num2,p->off_name,p->time,p->count,p->price);
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+
+	else if(a==3)
+	{
+		printf("请输入出版单位：\n");
+		scanf("%s",str);
+		p=head->next;
+		while(p)
+		{
+			if(strcmp(p->off_name,str)==0)
+			{
+				if(r==NULL)
+					r=p;
+					printf("%-10d%-14s%-10s%-6s%-14s%-10s%-8d%-5.2f\n",
+					p->num1,p->bok_name,p->wrt_name,p->num2,p->off_name,p->time,p->count,p->price);
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+
+	else if(a==4)
+	{
+		printf("请输入出版时间：\n");
+		scanf("%s",str);
+		p=head->next;
+		while(p)
+		{
+			if(strcmp(p->time,str)==0)
+			{
+				if(r==NULL)
+					r=p;
+					printf("%-10d%-14s%-10s%-6s%-14s%-10s%-8d%-5.2f\n",
+					p->num1,p->bok_name,p->wrt_name,p->num2,p->off_name,p->time,p->count,p->price);
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+	getchar();
+	return NULL;
+}
+
+
+struct Student*searchreader(struct Student*head)
+{
+	int a,num,i;
+	STU*p,*r=NULL;
+	char str[20];
+	if(!head->next)
+	{
+		printf("没有学生信息！\n");
+        getchar();
+		return NULL;
+	}
+
+	printf("请选择查询方式：1-按学生编号    2-按姓名   3-按出借阅号   \n");
+	scanf("%d",&a);
+	if(a==1)
+	{
+		printf("请输入学生编号：\n");
+		scanf("%d",&num);
+		p=head->next;
+		while(p)
+		{
+			if(p->stunum==num)
+			{
+				if(r==NULL)
+					r=p;
+				printf("学生编号:%d   借阅号:%-4d   姓名:%-10s  最大借阅量:%-4d   已借阅量:%-4d\n ",p->stunum,p->lendnum,p->name,p->max_bor,p->hav_bou);
+			           for(i=0;i<p->hav_bou;i++)
+					   {
+				            printf("\n已借的书籍：");
+			               	printf("%s   \n",p->lend[i].bok_name);
+					   }
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+
+	else if(a==2)
+	{
+		printf("请输入姓名：\n");
+		scanf("%s",str);
+		p=head->next;
+		while(p)
+		{
+			if(strcmp(p->name,str)==0)
+			{
+				if(r==NULL)
+					r=p;
+				printf("学生编号:%d   借阅号:%-4d   姓名:%-10s  最大借阅量:%-4d   已借阅量:%-4d\n ",p->stunum,p->lendnum,p->name,p->max_bor,p->hav_bou);
+			           for(i=0;i<p->hav_bou;i++)
+					   {
+				            printf("\n已借的书籍：");
+			               	printf("%s   \n",p->lend[i].bok_name);
+					   }
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+
+	else if(a==3)
+	{
+		printf("请输入借阅号：\n");
+		scanf("%d",&num);
+		p=head->next;
+		while(p)
+		{
+			if(p->lendnum==num)
+			{
+				if(r==NULL)
+					r=p;
+				printf("学生编号:%d   借阅号:%-4d   姓名:%-10s  最大借阅量:%-4d   已借阅量:%-4d\n ",p->stunum,p->lendnum,p->name,p->max_bor,p->hav_bou);
+			           for(i=0;i<p->hav_bou;i++)
+					   {
+				            printf("\n已借的书籍：");
+			               	printf("%s   \n",p->lend[i].bok_name);
+					   }
+				
+			}
+			p=p->next;
+		}
+		getchar();
+		return r;
+	}
+
+	
+	getchar();
+	return NULL;
+}
+
+
+struct Book*deletebok(struct Book*head)
+{
+	int a;
+	int num;
+	BOK*p,*r;
+	char bname[20];
+    if(!head->next)
+	{
+		
+	printf("没有书籍信息！");
+	return NULL;
+	}
+	
+	printf("请按键选择：1-按书籍编号删除信息   2-按书名删除信息\n");
+	scanf("%d",&a);
+	if(a==1)
+	{
+		printf("请输入书籍编号：\n");
+		scanf("%d",&num);
+		p=head->next;
+		while(p&&p->num1!=num)
+		{r=p;
+		p=p->next;
+		}
+		if(p->num1==num)
+		{
+			if(p==head)
+			head=p->next;
+	        else
+			{
+			   r->next=p->next;       //将p所指结点从链表中删去
+			   saveflag=1;
+			   free(p);                 //释放内存空间
+			   printf("\n书籍删除成功！\n");
+			}
+		}
+		else
+			printf("\n未找到此书！\n");
+	}
+	else if(a==2)
+	{
+		printf("请输入书名：\n");
+		scanf("%s",bname);
+		p=head->next;
+		while(p&&strcmp(p->bok_name,bname)!=0)
+		{r=p;
+		p=p->next;
+		}
+		if(strcmp(p->bok_name,bname)==0)
+		{
+			if(p==head)
+			head=p->next;
+	        else
+			{
+			r->next=p->next;        //将p所指结点从链表中删去
+			saveflag=1;
+			free(p);          //释放内存空间
+			printf("\n书籍删除成功！\n");
+			}
+		}
+		else
+			printf("\n未找到此书！\n");
+	}
+	getchar();
+	saveflag=1;
+	return head;
+}
+
+
+
+struct Student*deletereader(struct Student*head)
+{
+	int a;
+	int num;
+	STU*p,*r;
+	char rname[20];
+    if(!head->next)
+	{
+		
+	printf("没有读者信息！");
+	return NULL;
+	}
+	
+	printf("请按键选择：1-按学号删除信息   2-按姓名删除信息\n");
+	scanf("%d",&a);
+	if(a==1)
+	{
+		printf("请输入学号：\n");
+		scanf("%d",&num);
+		p=head->next;
+		while(p&&p->stunum!=num)
+		{r=p;
+		p=p->next;
+		}
+		if(p->stunum==num)
+		{
+			if(p==head)
+			head=p->next;
+	        else
+			{
+			r->next=p->next;        //将p所指结点从链表中删去
+			saveflag=1;
+			free(p);            //释放内存空间
+			printf("\n读者删除成功！\n");
+			}
+		}
+		else
+			printf("\n未找到此人！\n");
+	}
+	else if(a==2)
+	{
+		printf("请输入读者姓名：\n");
+		scanf("%s",rname);
+		p=head->next;
+		while(p&&p->name!=rname)
+		{r=p;
+		p=p->next;
+		}
+		if(strcmp(p->name,rname)==0)
+		{
+			r->next=p->next;
+			saveflag=1;
+			free(p);
+			printf("\n读者删除成功！\n");
+		}
+		else
+			printf("\n未找到此人！\n");
+	}
+	getchar();
+	saveflag=1;
+	return head;
+}
+
+
+void changebok(struct Book*head)
+{
+	BOK*p;
+	int num;
+	printf("请输入你要修改的书籍的书籍编号：\n");
+	scanf("%d",&num);    getchar();
+	p=head->next;
+	while(p&&p->num1!=num)
+		p=p->next;
+	if(p)
+	{
+		printf("请输入该书的书名：\n");
+	           scanf("%s",p->bok_name);
+	         printf("请输入该书的作者名：\n");
+	           scanf("%s",p->wrt_name);
+	         printf("请输入该书的书籍分类号：\n");
+	           scanf("%s",p->num2);
+	         printf("请输入该书的出版单位：\n");
+	           scanf("%s",p->off_name);
+	         printf("请输入该书的出版时间：\n");
+	           scanf("%s",p->time);
+	         printf("请输入该书的库存数量：\n");
+	           scanf("%d",&p->count);
+	        printf("请输入该书的书籍价格：\n");
+	           scanf("%f",&p->price);
+			   outbok(head);
+			   saveflag=1;
+			   //getchar();
+	}
+	else 
+		printf("无此书籍信息！");
+
+
+}
+
+
+
+
+void bor_bok(struct Student*head1,struct Book*head)
+{
+//	FILE *fp;
+	STU *p;
+	BOK *q;
+	int n1,n2;
+	//char fn[20];
+	printf("\n请输入你的借阅号,输入0时停止借书\n");
+	scanf("%d",&n1);
+	while(n1!=0)
+	{
+		p=head1->next;
+	while(p&&p->lendnum!=n1)
+		p=p->next;
+	  if(p)
+	  {
+		printf("\n请输入你要借的书籍编号,输入0时停止借书\n");
+		scanf("%d",&n2);
+		while(n2!=0)
+		{
+			q=head->next;
+		while(q&&q->num1!=n2)
+			q=q->next;
+		
+	       if(q)
+		   {
+			    if(q->count!=0)
+				{
+				   p->lend[p->hav_bou++]=*q;
+				    q->count--;
+				}
+			    else
+			     	printf("此书已被借完！\n");
+			    if(p->hav_bou>4)
+				{	  printf("你已借满四本书，不可再借！\n");
+	                  return ;	
+				}
+		   }
+	     	printf("\n请输入你要借的书籍编号，输入0时停止借书\n");
+		    scanf("%d",&n2);
+		}
+	  }
+	  printf("\n请输入你的借阅号,输入0时停止借书\n");
+	scanf("%d",&n1);  //getchar();
+	}
+	/*p=head1->next;
+	printf("保存借阅信息，请输入文件名：");
+	scanf("%s",fn);
+	if(strchr(fn,'.')==NULL)
+		strcat(fn,".dat");
+	if((fp=fopen(fn,"wb"))==NULL)
+	{printf("打开文件失败！\n");
+	return;
+	}
+	while(p)
+	{
+		fwrite(p,sizeof(STU),1,fp);
+			p=p->next;
+	}
+	fclose(fp);*/
+}
+
+
+
+void ret_bok(struct Student*head1,struct Book*head2)
+{
+	STU*p;
+	BOK*q;
+	int num,i;
+	char c;
+	printf("请输入你的借阅号：\n");
+	scanf("%d",&num);   
+	p=head1->next;
+	while(p&&p->lendnum!=num)
+		p=p->next;
+	if(p)
+	{
+		while(p->hav_bou)
+		{
+			printf("请输入要还的书籍编号：\n");
+			scanf("%d",&num); 
+			getchar();   //接收回车符
+			q=head2->next;
+			while(q&&q->num1!=num)
+				q=q->next;
+			q->count++;
+			p->hav_bou--;
+			for(i=0;i<4;i++)
+				if(q->num1==p->lend[i].num1)
+				{
+					p->lend[i]=p->lend[i+1];
+			
+				}
+				printf("是否要继续还书？按Y继续，按N返回\n");
+	                c=getchar();   
+	                    if(c=='n')
+	                   	break;
+		}
+	}
+	printf("结束还书\n");
+	return;
+}
+
+
+
+
+void outbok(struct Book* head)
+{
+	BOK*p;
+	if(head==NULL)
+	{
+		printf("书籍已被借完，没有书籍信息！");
+	    return;
+	}
+	p=head->next;
+	if(!p)
+	{
+       printf("没有书籍信息！");   
+	}
+	printf("\n书籍编号      书名     作者名   分类号  出版单位   出版时间   库存数量   价格\n");
+	  do
+		{
+			printf("%-10d%-14s%-10s%-6s%-14s%-10s%-8d%-5.2f\n",
+					p->num1,p->bok_name,p->wrt_name,p->num2,p->off_name,p->time,p->count,p->price);
+			p=p->next;
+		}while(p!=NULL);
+		return;
+
+}
+
+
+void outreader(struct Student* head)
+{
+	int i=0;
+    STU*p;
+	p=head->next;
+	if(head==NULL)
+	{
+       printf("没有读者信息！");   
+	}
+	if(head!=NULL)
+		do
+		{
+			printf("\n学生编号:%d  借阅号:%-4d  姓名:%-10s  最大借阅量:%-4d  已借阅量:%-4d\n ",
+					p->stunum,p->lendnum,p->name,p->max_bor,p->hav_bou);
+			if(i<p->hav_bou)
+			printf("已借的书籍:");
+			for(i;i<p->hav_bou;i++)
+			{
+				printf("%s   ",p->lend[i].bok_name);
+			}
+			printf("\n");
+			p=p->next;
+		}while(p!=NULL);
+		return;
+
+}
